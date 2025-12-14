@@ -20,7 +20,7 @@ compile() {
   fi
 
   "$CXX" -std=c++20 -O2 -Wall -Wextra -I "$INCLUDE_DIR" \
-    "$SRC_DIR/graph.cpp" "$SRC_DIR/io.cpp" "$SRC_DIR/main.cpp" -o "$BIN"
+    "$SRC_DIR/graph.cpp" "$SRC_DIR/io.cpp" "$SRC_DIR/bellman_ford.cpp" "$SRC_DIR/main.cpp" -o "$BIN"
 }
 
 run() {
@@ -60,6 +60,6 @@ case ${1:-all} in
     fi
     ;;
   *)
-    echo "Usage: $0 [build|run|all|plot] [--input <path> --output <path> --source <s> --sink <t> --dot <path.dot>]" >&2
+    echo "Usage: $0 [build|run|all|plot] [--input <path> --output <path> --source <s> --dot <path.dot>]" >&2
     exit 2 ;;
 esac

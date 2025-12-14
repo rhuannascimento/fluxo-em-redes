@@ -17,7 +17,7 @@ public:
     Graph() = default;
 
     VertexId add_vertex(const std::string& label = "");
-    EdgeId add_edge(VertexId from, VertexId to, int capacity = 0);
+    EdgeId add_edge(VertexId from, VertexId to, int cost = 0);
 
     const Vertex* get_vertex(VertexId id) const;
     const Edge* get_edge(EdgeId id) const;
@@ -31,10 +31,8 @@ public:
     bool has_vertex(VertexId id) const;
     bool has_edge(EdgeId id) const;
 
-    void set_edge_capacity(EdgeId id, int capacity);
-    int edge_capacity(EdgeId id) const;
-    int edge_flow(EdgeId id) const;
-    void set_edge_flow(EdgeId id, int flow);
+    int edge_cost(EdgeId id) const;
+    void set_edge_cost(EdgeId id, int cost);
 
 private:
     VertexId next_vertex_id_ {0};

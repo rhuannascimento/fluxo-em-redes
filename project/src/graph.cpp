@@ -8,9 +8,9 @@ Vertex::Id Graph::add_vertex(const std::string& label) {
     return id;
 }
 
-Edge::Id Graph::add_edge(VertexId from, VertexId to, int capacity) {
+Edge::Id Graph::add_edge(VertexId from, VertexId to, int cost) {
     const auto id = next_edge_id_++;
-    edges_.emplace(id, std::make_unique<Edge>(id, from, to, capacity, 0));
+    edges_.emplace(id, std::make_unique<Edge>(id, from, to, cost));
     adj_out_[from].push_back(id);
     adj_in_[to].push_back(id);
     return id;
@@ -62,24 +62,13 @@ bool Graph::has_edge(EdgeId id) const {
     return edges_.find(id) != edges_.end();
 }
 
-void Graph::set_edge_capacity(EdgeId id, int capacity) {
-    auto it = edges_.find(id);
-    if (it != edges_.end()) it->second->set_capacity(capacity);
-}
-
-int Graph::edge_capacity(EdgeId id) const {
+int Graph::edge_cost(EdgeId id) const {
     auto it = edges_.find(id);
     if (it == edges_.end()) return 0;
-    return it->second->capacity();
+    return it->second->cost();
 }
 
-int Graph::edge_flow(EdgeId id) const {
+void Graph::set_edge_cost(EdgeId id, int cost) {
     auto it = edges_.find(id);
-    if (it == edges_.end()) return 0;
-    return it->second->flow();
-}
-
-void Graph::set_edge_flow(EdgeId id, int flow) {
-    auto it = edges_.find(id);
-    if (it != edges_.end()) it->second->set_flow(flow);
+    if (it != edges_.end()) it->second->set_cost(cost);
 }

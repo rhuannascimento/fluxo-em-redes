@@ -25,38 +25,14 @@ Graph load_graph_from_file(const std::string& path) {
         if (line.empty()) continue;
         std::istringstream ss(line);
         Graph::VertexId u, v;
-        int c;
-        if (!(ss >> u >> v >> c)) continue;
+        int w = 0;
+        if (!(ss >> u >> v >> w)) continue;
+        
         auto uid = map_id(u);
         auto vid = map_id(v);
-        g.add_edge(uid, vid, c);
+        g.add_edge(uid, vid, w);
     }
     return g;
-}
-
-FlowReport build_flow_report(const Graph& g) {
-    FlowReport r{0, {}};
-    for (auto eid : g.edges()) {
-        const Edge* e = g.get_edge(eid);
-        if (!e) continue;
-        r.entries.push_back(FlowResultEntry{
-            e->from(), e->to(), e->capacity(), e->flow(), e->residual_capacity()
-        });
-        r.max_flow += e->flow();
-    }
-    return r;
-}
-
-void write_report_to_file(const std::string& path, const FlowReport& report) {
-    std::ofstream out(path);
-    if (!out.is_open()) return;
-    out << "max_flow " << report.max_flow << '\n';
-    for (const auto& entry : report.entries) {
-        out << entry.from << ' ' << entry.to
-            << " capacity=" << entry.capacity
-            << " flow=" << entry.flow
-            << " residual=" << entry.residual << '\n';
-    }
 }
 
 void write_dot(const std::string& path, const Graph& g) {
@@ -64,18 +40,16 @@ void write_dot(const std::string& path, const Graph& g) {
     if (!out.is_open()) return;
     out << "digraph G {\n";
     out << "  rankdir=LR;\n";
-    // vertices with labels
     for (auto vid : g.vertices()) {
         const Vertex* v = g.get_vertex(vid);
         std::string label = v ? v->label() : std::to_string(vid);
         out << "  " << vid << " [label=\"" << label << "\"];\n";
     }
-    // edges with capacity/flow
     for (auto eid : g.edges()) {
         const Edge* e = g.get_edge(eid);
         if (!e) continue;
         out << "  " << e->from() << " -> " << e->to()
-            << " [label=\"c=" << e->capacity() << ", f=" << e->flow() << "\"];\n";
+            << " [label=\"w=" << e->cost() << "\"];\n";
     }
     out << "}\n";
 }

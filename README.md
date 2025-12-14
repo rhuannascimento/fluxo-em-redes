@@ -24,26 +24,28 @@ run.sh
 ```
 
 ## Conceitos
-- `source`: vértice de origem (fonte) do fluxo.
-- `sink`: vértice de destino (sumidouro) do fluxo.
-- `capacity`: capacidade máxima de uma aresta.
-- `flow`: fluxo atual em uma aresta.
-- `residual`: capacidade restante (`capacity - flow`).
+- `source`: vértice de origem (fonte) do caminho mínimo.
+- `cost`: custo ou peso da aresta (pode ser negativo).
 
 ## Formato das Instâncias
-Cada linha representa uma aresta `u v capacity`:
+Cada linha representa uma aresta `u v cost`:
 
 ```
-u v capacity
+u v cost
 ```
 
-Exemplo (`instances/graph_10.txt`):
+Exemplo (`instances/simulation_1.txt`):
 ```
-0 1 10
-0 2 8
+0 1 6
+0 2 7
+1 2 8
 1 3 5
-...
-8 9 7
+1 4 -4
+2 3 -3
+2 4 9
+3 1 -2
+4 0 2
+4 3 7
 ```
 
 Os vértices são criados automaticamente conforme aparecem nas arestas.
@@ -57,33 +59,37 @@ Comandos principais:
 ./run.sh build
 
 # rodar (compila se necessário)
-./run.sh run --input <caminho> --source <id> --sink <id> [--output <caminho>]
+./run.sh run --input <caminho> --source <id> [--output <caminho>]
+
+# rodar algoritmo de Bellman-Ford
+./run.sh run --input <caminho> --source <id> --bellman
 
 # compilar e rodar numa tacada só
-./run.sh all --input <caminho> --source <id> --sink <id> [--output <caminho>]
+./run.sh all --input <caminho> --source <id> [--output <caminho>]
 
 # plotar grafo (gera DOT e PNG)
-./run.sh plot --input <caminho> --source <id> --sink <id> [--dot <arquivo.dot>]
+./run.sh plot --input <caminho> --source <id> [--dot <arquivo.dot>]
 ```
 
 Exemplos:
 ```
 ./run.sh build
-./run.sh run --input instances/graph_10.txt --source 0 --sink 9
-./run.sh run --input instances/graph_100.txt --source 0 --sink 99 --output result_100.txt
+./run.sh run --input instances/graph_10.txt --source 0 
+./run.sh run --input instances/simulation_1.txt --source 0 --bellman
+./run.sh run --input instances/graph_100.txt --source 0 --output result_100.txt
 
 # gerar visualização (DOT + PNG)
-./run.sh plot --input instances/graph_10.txt --source 0 --sink 9
+./run.sh plot --input instances/graph_10.txt --source 0
 ```
 
 Observação: no modo `plot`, o script gera um arquivo DOT e, se o Graphviz estiver instalado, renderiza um PNG e abre a imagem automaticamente no macOS.
 
 ## Flags suportadas pelo binário
-- `--input <caminho>`: arquivo de instância (formato `u v capacity`).
+- `--input <caminho>`: arquivo de instância (formato `u v capacity [cost]`).
+## Flags suportadas pelo binário
+- `--input <caminho>`: arquivo de instância (formato `u v cost`).
 - `--output <caminho>`: arquivo de saída do relatório (opcional).
-- `--source <id>`: ID do vértice fonte.
-- `--sink <id>`: ID do vértice sumidouro.
-- `--dot <caminho.dot>`: exporta o grafo em formato Graphviz DOT.
+- `--bellman`: executa o algoritmo de Bellman-Ford para caminhos mínimos.
 
 ## Visualização com Graphviz
 Instale o Graphviz (macOS):
