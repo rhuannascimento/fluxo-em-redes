@@ -3,84 +3,85 @@
 #include <algorithm>
 
 const int INF = 1e9;
+const int NOT_CALCULATED = -2e9;
 
-static std::vector<std::vector<int>> memo;
-static const Graph* graph_ptr = nullptr;
-static Graph::VertexId src_vertex;
+static std::vector<std::vector<int>> min_distance_by_edge_count;
+static const Graph* graph_context = nullptr;
+static Graph::VertexId source_vertex_id;
 
-static int solve(int k, Graph::VertexId v) {
-    if (k == 0) {
-        return (v == src_vertex) ? 0 : INF;
+static int distance_with_k_edges(int num_edges, Graph::VertexId vertex_id) {
+    if (num_edges == 0) {
+        return (vertex_id == source_vertex_id) ? 0 : INF;
     }
-    if (memo[k][v] != -1) {
-        return memo[k][v];
+    if (min_distance_by_edge_count[num_edges][vertex_id] != NOT_CALCULATED) {
+        return min_distance_by_edge_count[num_edges][vertex_id];
     }
 
-    int res = solve(k - 1, v);
+    int best_distance = distance_with_k_edges(num_edges - 1, vertex_id);
 
-    for (auto edge_id : graph_ptr->incoming(v)) {
-        const auto* edge = graph_ptr->get_edge(edge_id);
-        int u = edge->from();
-        int weight = edge->cost();
+    for (auto incoming_edge_id : graph_context->incoming(vertex_id)) {
+        const auto* incoming_edge = graph_context->get_edge(incoming_edge_id);
+        int from_vertex = incoming_edge->from();
+        int edge_weight = incoming_edge->cost();
         
-        int prev_dist = solve(k - 1, u);
-        if (prev_dist != INF) {
-            if (prev_dist + weight < res) {
-                res = prev_dist + weight;
+        int prev_distance = distance_with_k_edges(num_edges - 1, from_vertex);
+        if (prev_distance != INF) {
+            if (prev_distance + edge_weight < best_distance) {
+                best_distance = prev_distance + edge_weight;
             }
         }
     }
 
-    return memo[k][v] = res;
+    return min_distance_by_edge_count[num_edges][vertex_id] = best_distance;
 }
 
-static int get_predecessor_recursive(int k, Graph::VertexId v) {
-    if (k == 0) return -1;
-    if (solve(k, v) == INF) return -1;
+static int find_predecessor_recursive(int num_edges, Graph::VertexId vertex_id) {
+    if (num_edges == 0) return -1;
+    if (distance_with_k_edges(num_edges, vertex_id) == INF) return -1;
 
-    if (solve(k, v) == solve(k - 1, v)) {
-        return get_predecessor_recursive(k - 1, v);
+    if (distance_with_k_edges(num_edges, vertex_id) == distance_with_k_edges(num_edges - 1, vertex_id)) {
+        return find_predecessor_recursive(num_edges - 1, vertex_id);
     }
 
-    int current_dist = solve(k, v);
-    for (auto edge_id : graph_ptr->incoming(v)) {
-        const auto* edge = graph_ptr->get_edge(edge_id);
-        int u = edge->from();
-        int weight = edge->cost();
+    int current_distance = distance_with_k_edges(num_edges, vertex_id);
+    for (auto incoming_edge_id : graph_context->incoming(vertex_id)) {
+        const auto* incoming_edge = graph_context->get_edge(incoming_edge_id);
+        int from_vertex = incoming_edge->from();
+        int edge_weight = incoming_edge->cost();
         
-        int prev_dist = solve(k - 1, u);
-        if (prev_dist != INF && prev_dist + weight == current_dist) {
-            return u;
+        int prev_distance = distance_with_k_edges(num_edges - 1, from_vertex);
+        if (prev_distance != INF && prev_distance + edge_weight == current_distance) {
+            return from_vertex;
         }
     }
     return -1;
 }
 
 BellmanFordResult bellman_ford_recursive(const Graph& g, Graph::VertexId source) {
-    graph_ptr = &g;
-    src_vertex = source;
-    int V = g.vertices().size();
+    graph_context = &g;
+    source_vertex_id = source;
+    int num_vertices = g.vertices().size();
     
-    memo.assign(V + 1, std::vector<int>(V, -1));
+    min_distance_by_edge_count.assign(num_vertices + 1, std::vector<int>(num_vertices, NOT_CALCULATED));
 
     BellmanFordResult result;
-    result.distances.resize(V);
-    result.predecessors.resize(V, -1); 
+    result.distances.resize(num_vertices);
+    result.predecessors.resize(num_vertices, -1); 
     result.has_negative_cycle = false;
 
-    for (int v = 0; v < V; ++v) {
-        result.distances[v] = solve(V - 1, v);
+    for (int vertex_id = 0; vertex_id < num_vertices; ++vertex_id) {
+        result.distances[vertex_id] = distance_with_k_edges(num_vertices - 1, vertex_id);
     }
 
-    for (int v = 0; v < V; ++v) {
-        if (static_cast<Graph::VertexId>(v) != source && result.distances[v] != INF) {
-            result.predecessors[v] = get_predecessor_recursive(V - 1, v);
+    for (int vertex_id = 0; vertex_id < num_vertices; ++vertex_id) {
+        if (static_cast<Graph::VertexId>(vertex_id) != source && result.distances[vertex_id] != INF) {
+            result.predecessors[vertex_id] = find_predecessor_recursive(num_vertices - 1, vertex_id);
         }
     }
 
-    for (int v = 0; v < V; ++v) {
-        int dist_V = solve(V, v);
-        if (dist_V < result.distances[v]) {
+    for (int vertex_id = 0; vertex_id < num_vertices; ++vertex_id) {
+        int dist_with_num_vertices = distance_with_k_edges(num_vertices, vertex_id);
+        if (dist_with_num_vertices < result.distances[vertex_id]) {
             result.has_negative_cycle = true;
             break;
         }
