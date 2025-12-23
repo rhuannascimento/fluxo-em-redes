@@ -6,6 +6,7 @@ const int INF = 1e9;
 const int NOT_CALCULATED = -2e9;
 
 static std::vector<std::vector<int>> min_distance_by_edge_count;
+static std::vector<std::vector<int>> predecessor_by_edge_count;
 static const Graph* graph_context = nullptr;
 static Graph::VertexId source_vertex_id;
 
@@ -18,6 +19,7 @@ static int distance_with_k_edges(int num_edges, Graph::VertexId vertex_id) {
     }
 
     int best_distance = distance_with_k_edges(num_edges - 1, vertex_id);
+    int best_predecessor = predecessor_by_edge_count[num_edges - 1][vertex_id];
 
     for (auto incoming_edge_id : graph_context->incoming(vertex_id)) {
         const auto* incoming_edge = graph_context->get_edge(incoming_edge_id);
@@ -28,34 +30,15 @@ static int distance_with_k_edges(int num_edges, Graph::VertexId vertex_id) {
         if (prev_distance != INF) {
             if (prev_distance + edge_weight < best_distance) {
                 best_distance = prev_distance + edge_weight;
+                best_predecessor = from_vertex;
             }
         }
     }
 
+    predecessor_by_edge_count[num_edges][vertex_id] = best_predecessor;
     return min_distance_by_edge_count[num_edges][vertex_id] = best_distance;
 }
 
-static int find_predecessor_recursive(int num_edges, Graph::VertexId vertex_id) {
-    if (num_edges == 0) return -1;
-    if (distance_with_k_edges(num_edges, vertex_id) == INF) return -1;
-
-    if (distance_with_k_edges(num_edges, vertex_id) == distance_with_k_edges(num_edges - 1, vertex_id)) {
-        return find_predecessor_recursive(num_edges - 1, vertex_id);
-    }
-
-    int current_distance = distance_with_k_edges(num_edges, vertex_id);
-    for (auto incoming_edge_id : graph_context->incoming(vertex_id)) {
-        const auto* incoming_edge = graph_context->get_edge(incoming_edge_id);
-        int from_vertex = incoming_edge->from();
-        int edge_weight = incoming_edge->cost();
-        
-        int prev_distance = distance_with_k_edges(num_edges - 1, from_vertex);
-        if (prev_distance != INF && prev_distance + edge_weight == current_distance) {
-            return from_vertex;
-        }
-    }
-    return -1;
-}
 
 BellmanFordResult bellman_ford_recursive(const Graph& g, Graph::VertexId source) {
     graph_context = &g;
@@ -63,6 +46,7 @@ BellmanFordResult bellman_ford_recursive(const Graph& g, Graph::VertexId source)
     int num_vertices = g.vertices().size();
     
     min_distance_by_edge_count.assign(num_vertices + 1, std::vector<int>(num_vertices, NOT_CALCULATED));
+    predecessor_by_edge_count.assign(num_vertices + 1, std::vector<int>(num_vertices, -1));
 
     BellmanFordResult result;
     result.distances.resize(num_vertices);
@@ -75,7 +59,7 @@ BellmanFordResult bellman_ford_recursive(const Graph& g, Graph::VertexId source)
 
     for (int vertex_id = 0; vertex_id < num_vertices; ++vertex_id) {
         if (static_cast<Graph::VertexId>(vertex_id) != source && result.distances[vertex_id] != INF) {
-            result.predecessors[vertex_id] = find_predecessor_recursive(num_vertices - 1, vertex_id);
+            result.predecessors[vertex_id] = predecessor_by_edge_count[num_vertices - 1][vertex_id];
         }
     }
 
