@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <optional>
 
 #include "vertex.hpp"
 #include "edge.hpp"
@@ -13,8 +14,10 @@ class Graph {
 public:
     using VertexId = Vertex::Id;
     using EdgeId = Edge::Id;
-
+    
     Graph() = default;
+    
+    static constexpr int INF = 1000000000;
 
     VertexId add_vertex(const std::string& label = "");
     EdgeId add_edge(VertexId from, VertexId to, int cost = 0);
@@ -34,6 +37,13 @@ public:
     int edge_cost(EdgeId id) const;
     void set_edge_cost(EdgeId id, int cost);
 
+    size_t num_vertices() const;
+    void resize_cost_matrix_for_new_vertex(int inf = INF);
+    void set_matrix_cost(VertexId u, VertexId v, int c);
+    const std::vector<std::vector<int>>& cost_matrix() const;
+
+    std::optional<VertexId> vertex_id_by_label(const std::string& label) const;
+
 private:
     VertexId next_vertex_id_ {0};
     EdgeId next_edge_id_ {0};
@@ -43,4 +53,5 @@ private:
 
     std::unordered_map<VertexId, std::vector<EdgeId>> adj_out_;
     std::unordered_map<VertexId, std::vector<EdgeId>> adj_in_;
+    std::vector<std::vector<int>> cost_matrix_;
 };

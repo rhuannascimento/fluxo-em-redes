@@ -20,7 +20,7 @@ compile() {
   fi
 
   "$CXX" -std=c++20 -O2 -Wall -Wextra -I "$INCLUDE_DIR" \
-    "$SRC_DIR/graph.cpp" "$SRC_DIR/io.cpp" "$SRC_DIR/bellman_ford.cpp" "$SRC_DIR/main.cpp" -o "$BIN"
+  "$SRC_DIR/graph.cpp" "$SRC_DIR/io.cpp" "$SRC_DIR/bellman_ford.cpp" "$SRC_DIR/floyd.cpp" "$SRC_DIR/main.cpp" -o "$BIN"
 }
 
 run() {

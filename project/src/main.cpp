@@ -7,12 +7,17 @@
 #include "graph.hpp"
 #include "io.hpp"
 #include "bellman_ford.hpp"
+#include "floyd.hpp"
+#include <optional>
+#include <iomanip>
 
 int main(int argc, char* argv[]) {
     std::string inputPath;
     std::string outputPath;
     std::string dotPath;
     bool runBellman = false;
+    bool runFloyd = false;
+    std::string x1_label = "0";
     Graph::VertexId source = 0;
 
     for (int i = 1; i < argc; ++i) {
@@ -26,6 +31,10 @@ int main(int argc, char* argv[]) {
             dotPath = argv[++i];
         } else if (std::strcmp(argv[i], "--bellman") == 0) {
             runBellman = true;
+        } else if (std::strcmp(argv[i], "--floyd") == 0) {
+            runFloyd = true;
+        } else if (std::strcmp(argv[i], "--x1") == 0 && i + 1 < argc) {
+            x1_label = argv[++i];
         }
     }
 
@@ -52,6 +61,27 @@ int main(int argc, char* argv[]) {
                 }
 
                 std::cout << "\n";
+            }
+        }
+    }
+
+    if (runFloyd) {
+        FloydResult fres = floyd_warshall(g);
+        if (fres.has_negative_cycle) {
+            std::cout << "Ciclo negativo detectado!\n";
+        } else {
+            auto opt = g.vertex_id_by_label(x1_label);
+            if (!opt) {
+                std::cout << "Label X1='" << x1_label << "' nao encontrado no grafo\n";
+            } else {
+                auto vid = *opt;
+                std::cout << "Caminho minimo de " << vid << ":\n";
+                for (size_t j = 0; j < fres.dist[vid].size(); ++j) {
+                    std::cout << "para " << j << ": ";
+                    if (fres.dist[vid][j] >= 100000000) std::cout << "INF";
+                    else std::cout << fres.dist[vid][j];
+                    std::cout << "\n";
+                }
             }
         }
     }
