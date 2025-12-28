@@ -1,7 +1,7 @@
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate
-from tools import (
+from .tools import (
     get_outgoing_edges,
     get_incoming_edges,
     get_edge_cost,
@@ -46,7 +46,7 @@ def create_graph_agent(model_name: str, max_iterations: int):
     Sua tarefa NÃO é fazer contas de cabeça, mas sim CONTROLAR a memória do algoritmo usando as ferramentas disponíveis.
 
     ### OBJETIVO:
-    Executar o algoritmo de Bellman-Ford (ou Dijkstra) usando a "Memória de Algoritmo" para encontrar o caminho mínimo da origem para TODOS os nós.
+    Executar o algoritmo de Bellman-Ford usando a "Memória de Algoritmo" para encontrar o caminho mínimo da origem para TODOS os nós.
 
     ### FERRAMENTAS DE MEMÓRIA (USE-AS!):
     1. `algo_initialize_state(source)`: Reseta a memória e define dist[source]=0.

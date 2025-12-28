@@ -2,9 +2,9 @@ import os
 import sys
 import argparse
 from dotenv import load_dotenv
-import graph_native
-import tools
-from agent import create_graph_agent
+from graph_agent import graph_native
+from graph_agent import tools
+from graph_agent.agent import create_graph_agent
 
 
 def main():
@@ -12,7 +12,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Graph Pathfinding Agent")
     parser.add_argument(
-        "input_file",
+        "--input_file",
         default=os.getenv("DEFAULT_GRAPH"),
         help="Path to the graph input file",
     )

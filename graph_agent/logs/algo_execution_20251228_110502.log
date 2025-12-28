@@ -1,0 +1,29 @@
+2025-12-28 11:05:02,249 - INFO - Initializing algorithm state with source node: 0
+2025-12-28 11:05:02,249 - INFO - State initialized. Source: 0. All other distances set to INF.
+2025-12-28 11:05:09,045 - INFO - RELAX SUCCESS: 0->1 (w=10). Updated dist[1] from inf to 10.0.
+2025-12-28 11:05:10,409 - INFO - RELAX SUCCESS: 0->2 (w=7). Updated dist[2] from inf to 7.0.
+2025-12-28 11:05:11,364 - INFO - RELAX SUCCESS: 0->3 (w=10). Updated dist[3] from inf to 10.0.
+2025-12-28 11:05:12,544 - INFO - RELAX SUCCESS: 0->4 (w=13). Updated dist[4] from inf to 13.0.
+2025-12-28 11:05:13,661 - INFO - RELAX SUCCESS: 0->5 (w=2). Updated dist[5] from inf to 2.0.
+2025-12-28 11:05:14,594 - INFO - RELAX SUCCESS: 0->6 (w=3). Updated dist[6] from inf to 3.0.
+2025-12-28 11:05:16,796 - INFO - RELAX SUCCESS: 0->7 (w=3). Updated dist[7] from inf to 3.0.
+2025-12-28 11:05:17,697 - INFO - RELAX SUCCESS: 0->8 (w=6). Updated dist[8] from inf to 6.0.
+2025-12-28 11:05:19,439 - INFO - RELAX SUCCESS: 0->9 (w=13). Updated dist[9] from inf to 13.0.
+2025-12-28 11:06:22,779 - INFO - RELAX SUCCESS: 5->2 (w=2). Updated dist[2] from 7.0 to 4.0.
+2025-12-28 11:06:24,194 - INFO - RELAX SUCCESS: 5->3 (w=3). Updated dist[3] from 10.0 to 5.0.
+2025-12-28 11:06:26,274 - INFO - RELAX SUCCESS: 5->4 (w=1). Updated dist[4] from 13.0 to 3.0.
+2025-12-28 11:06:44,233 - INFO - RELAX SUCCESS: 6->9 (w=3). Updated dist[9] from 13.0 to 6.0.
+2025-12-28 11:06:54,127 - INFO - RELAX SUCCESS: 7->1 (w=3). Updated dist[1] from 10.0 to 6.0.
+2025-12-28 11:06:57,072 - INFO - RELAX SUCCESS: 7->3 (w=1). Updated dist[3] from 5.0 to 4.0.
+2025-12-28 11:07:03,830 - INFO - RELAX SUCCESS: 7->8 (w=0). Updated dist[8] from 6.0 to 3.0.
+2025-12-28 11:07:05,138 - INFO - RELAX SUCCESS: 7->9 (w=2). Updated dist[9] from 6.0 to 5.0.
+2025-12-28 11:07:52,715 - INFO - Path reconstructed for target 0: 0 (Cost: 0.0)
+2025-12-28 11:07:52,716 - INFO - Path reconstructed for target 1: 0 -> 7 -> 1 (Cost: 6.0)
+2025-12-28 11:07:52,716 - INFO - Path reconstructed for target 2: 0 -> 5 -> 2 (Cost: 4.0)
+2025-12-28 11:07:52,717 - INFO - Path reconstructed for target 3: 0 -> 7 -> 3 (Cost: 4.0)
+2025-12-28 11:07:52,717 - INFO - Path reconstructed for target 4: 0 -> 5 -> 4 (Cost: 3.0)
+2025-12-28 11:07:52,717 - INFO - Path reconstructed for target 5: 0 -> 5 (Cost: 2.0)
+2025-12-28 11:07:52,717 - INFO - Path reconstructed for target 6: 0 -> 6 (Cost: 3.0)
+2025-12-28 11:07:52,718 - INFO - Path reconstructed for target 7: 0 -> 7 (Cost: 3.0)
+2025-12-28 11:07:52,718 - INFO - Path reconstructed for target 8: 0 -> 7 -> 8 (Cost: 3.0)
+2025-12-28 11:07:52,718 - INFO - Path reconstructed for target 9: 0 -> 7 -> 9 (Cost: 5.0)

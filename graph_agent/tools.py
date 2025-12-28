@@ -1,8 +1,42 @@
-import graph_native
+try:
+    from . import graph_native
+except ImportError:
+    import graph_native
 from langchain.tools import tool
 from typing import List, Dict, Optional
+import logging
+import os
+from datetime import datetime
 
 CURRENT_GRAPH = None
+LOGGER = None
+
+
+def setup_logger():
+    global LOGGER
+    if LOGGER is not None:
+        return LOGGER
+
+    log_dir = os.path.join(os.path.dirname(__file__), "logs")
+    os.makedirs(log_dir, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = os.path.join(log_dir, f"algo_execution_{timestamp}.log")
+
+    logger = logging.getLogger("GraphAlgoLogger")
+    logger.setLevel(logging.INFO)
+
+    # File handler
+    fh = logging.FileHandler(log_file)
+    fh.setLevel(logging.INFO)
+
+    # Formatter
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    fh.setFormatter(formatter)
+
+    logger.addHandler(fh)
+    LOGGER = logger
+    return logger
 
 
 class AlgorithmState:
@@ -28,8 +62,12 @@ def algo_initialize_state(source_node: int) -> str:
     Sets distance[source] = 0 and all others to Infinity.
     Clears predecessors.
     """
+    logger = setup_logger()
+    logger.info(f"Initializing algorithm state with source node: {source_node}")
+
     global ALGO_STATE
     if CURRENT_GRAPH is None:
+        logger.error("Attempted to initialize state without a loaded graph.")
         return "Error: Graph not loaded."
 
     ALGO_STATE = AlgorithmState()
@@ -40,6 +78,9 @@ def algo_initialize_state(source_node: int) -> str:
         ALGO_STATE.distances[v] = float("inf")
 
     ALGO_STATE.distances[source_node] = 0.0
+    logger.info(
+        f"State initialized. Source: {source_node}. All other distances set to INF."
+    )
     return f"Memory initialized. Source: {source_node}. Distances set to INF, Source set to 0."
 
 
@@ -54,13 +95,17 @@ def algo_relax_edge(u: int, v: int, weight: int) -> str:
 
     Returns a string indicating if an update occurred.
     """
+    logger = setup_logger()
+
     if not ALGO_STATE.initialized:
+        logger.error("Attempted to relax edge without initialization.")
         return "Error: Memory not initialized. Call algo_initialize_state first."
 
     dist_u = ALGO_STATE.distances.get(u, float("inf"))
     dist_v = ALGO_STATE.distances.get(v, float("inf"))
 
     if dist_u == float("inf"):
+        logger.debug(f"Relax skipped: Node {u} is unreachable.")
         return f"No update. Node {u} is currently unreachable (dist=INF)."
 
     new_dist = dist_u + weight
@@ -68,8 +113,14 @@ def algo_relax_edge(u: int, v: int, weight: int) -> str:
     if new_dist < dist_v:
         ALGO_STATE.distances[v] = new_dist
         ALGO_STATE.predecessors[v] = u
+        logger.info(
+            f"RELAX SUCCESS: {u}->{v} (w={weight}). Updated dist[{v}] from {dist_v} to {new_dist}."
+        )
         return f"UPDATED: Node {v} distance reduced from {dist_v} to {new_dist}. Predecessor set to {u}."
     else:
+        logger.debug(
+            f"Relax failed: {u}->{v} (w={weight}). New dist {new_dist} >= current {dist_v}."
+        )
         return f"No update. Current path to {v} ({dist_v}) is better or equal to new path ({new_dist})."
 
 
@@ -96,19 +147,34 @@ def algo_reconstruct_path(target_node: int) -> str:
     Reconstructs the path from Source to Target using the predecessor memory.
     Returns the formatted path string and total cost.
     """
+    logger = setup_logger()
+
     if not ALGO_STATE.initialized:
+        logger.error("Attempted to reconstruct path without initialization.")
         return "Error: Memory not initialized."
 
     if ALGO_STATE.distances.get(target_node) == float("inf"):
+        logger.info(f"Path reconstruction failed: Target {target_node} is unreachable.")
         return f"Target {target_node} is unreachable from source {ALGO_STATE.source}."
 
     path = []
     curr = target_node
 
+    # Safety check for cycles or infinite loops
+    visited = set()
+
     while curr != ALGO_STATE.source:
+        if curr in visited:
+            logger.error(
+                f"Cycle detected during path reconstruction for target {target_node}."
+            )
+            return "Error: Cycle detected in predecessor path."
+        visited.add(curr)
+
         path.append(curr)
         pred = ALGO_STATE.predecessors.get(curr)
         if pred is None:
+            logger.error(f"Broken path: Predecessor for {curr} missing.")
             return f"Error: Broken path. Predecessor for {curr} missing."
         curr = pred
 
@@ -118,6 +184,9 @@ def algo_reconstruct_path(target_node: int) -> str:
     path_str = " -> ".join(map(str, path))
     cost = ALGO_STATE.distances[target_node]
 
+    logger.info(
+        f"Path reconstructed for target {target_node}: {path_str} (Cost: {cost})"
+    )
     return f"Path: {path_str} | Total Cost: {cost}"
 
 
