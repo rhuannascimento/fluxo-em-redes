@@ -64,10 +64,20 @@ int main(int argc, char* argv[]) {
         if (fres.has_negative_cycle) {
             std::cout << "Ciclo negativo detectado!\n";
         } else {
+            std::cout << "Matriz de Distancias:\n";
             for (size_t i = 0; i < fres.dist.size(); ++i) {
                 for (size_t j = 0; j < fres.dist[i].size(); ++j) {
-                    if (fres.dist[i][j] >= 100000000) std::cout << "INF ";
-                    else std::cout << fres.dist[i][j] << " ";
+                    if (fres.dist[i][j] >= 100000000) std::cout << std::setw(5) << "INF";
+                    else std::cout << std::setw(5) << fres.dist[i][j];
+                }
+                std::cout << "\n";
+            }
+
+            std::cout << "\nMatriz de Antecessores:\n";
+            for (size_t i = 0; i < fres.pred.size(); ++i) {
+                for (size_t j = 0; j < fres.pred[i].size(); ++j) {
+                    if (fres.pred[i][j] == static_cast<Graph::VertexId>(-1)) std::cout << std::setw(5) << "NIL";
+                    else std::cout << std::setw(5) << fres.pred[i][j];
                 }
                 std::cout << "\n";
             }

@@ -7,11 +7,15 @@ FloydResult floyd_warshall(const Graph& g) {
     const auto& costMatrix = g.cost_matrix();
     size_t vertexCount = costMatrix.size();
     result.dist.assign(vertexCount, std::vector<long long>(vertexCount, g.INF));
+    result.pred.assign(vertexCount, std::vector<Graph::VertexId>(vertexCount, static_cast<Graph::VertexId>(-1)));
     const long long INF_LL = static_cast<long long>(g.INF);
 
     for (size_t src = 0; src < vertexCount; ++src) {
         for (size_t dst = 0; dst < vertexCount; ++dst) {
             result.dist[src][dst] = static_cast<long long>(costMatrix[src][dst]);
+            if (src != dst && result.dist[src][dst] < INF_LL) {
+                result.pred[src][dst] = src;
+            }
         }
     }
 
@@ -21,7 +25,10 @@ FloydResult floyd_warshall(const Graph& g) {
             for (size_t dst = 0; dst < vertexCount; ++dst) {
                 if (result.dist[mid][dst] >= INF_LL) continue;
                 long long candidate = result.dist[src][mid] + result.dist[mid][dst];
-                if (candidate < result.dist[src][dst]) result.dist[src][dst] = candidate;
+                if (candidate < result.dist[src][dst]) {
+                    result.dist[src][dst] = candidate;
+                    result.pred[src][dst] = result.pred[mid][dst];
+                }
             }
         }
     }
