@@ -13,18 +13,14 @@
 
 int main(int argc, char* argv[]) {
     std::string inputPath;
-    std::string outputPath;
     std::string dotPath;
     bool runBellman = false;
     bool runFloyd = false;
-    std::string x1_label = "0";
     Graph::VertexId source = 0;
 
     for (int i = 1; i < argc; ++i) {
         if (std::strcmp(argv[i], "--input") == 0 && i + 1 < argc) {
             inputPath = argv[++i];
-        } else if (std::strcmp(argv[i], "--output") == 0 && i + 1 < argc) {
-            outputPath = argv[++i];
         } else if (std::strcmp(argv[i], "--source") == 0 && i + 1 < argc) {
             source = static_cast<Graph::VertexId>(std::stoul(argv[++i]));
         } else if (std::strcmp(argv[i], "--dot") == 0 && i + 1 < argc) {
@@ -33,8 +29,6 @@ int main(int argc, char* argv[]) {
             runBellman = true;
         } else if (std::strcmp(argv[i], "--floyd") == 0) {
             runFloyd = true;
-        } else if (std::strcmp(argv[i], "--x1") == 0 && i + 1 < argc) {
-            x1_label = argv[++i];
         }
     }
 
@@ -70,18 +64,12 @@ int main(int argc, char* argv[]) {
         if (fres.has_negative_cycle) {
             std::cout << "Ciclo negativo detectado!\n";
         } else {
-            auto opt = g.vertex_id_by_label(x1_label);
-            if (!opt) {
-                std::cout << "Label X1='" << x1_label << "' nao encontrado no grafo\n";
-            } else {
-                auto vid = *opt;
-                std::cout << "Caminho minimo de " << vid << ":\n";
-                for (size_t j = 0; j < fres.dist[vid].size(); ++j) {
-                    std::cout << "para " << j << ": ";
-                    if (fres.dist[vid][j] >= 100000000) std::cout << "INF";
-                    else std::cout << fres.dist[vid][j];
-                    std::cout << "\n";
+            for (size_t i = 0; i < fres.dist.size(); ++i) {
+                for (size_t j = 0; j < fres.dist[i].size(); ++j) {
+                    if (fres.dist[i][j] >= 100000000) std::cout << "INF ";
+                    else std::cout << fres.dist[i][j] << " ";
                 }
+                std::cout << "\n";
             }
         }
     }

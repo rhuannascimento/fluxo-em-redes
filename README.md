@@ -23,10 +23,6 @@ instances/
 run.sh
 ```
 
-## Conceitos
-- `source`: vértice de origem (fonte) do caminho mínimo.
-- `cost`: custo ou peso da aresta (pode ser negativo).
-
 ## Formato das Instâncias
 Cada linha representa uma aresta `u v cost`:
 
@@ -59,13 +55,16 @@ Comandos principais:
 ./run.sh build
 
 # rodar (compila se necessário)
-./run.sh run --input <caminho> --source <id> [--output <caminho>]
+./run.sh run --input <caminho> --source <id>
 
 # rodar algoritmo de Bellman-Ford
 ./run.sh run --input <caminho> --source <id> --bellman
 
+# rodar algoritmo de Floyd
+./run.sh run --input <caminho> --floyd
+
 # compilar e rodar numa tacada só
-./run.sh all --input <caminho> --source <id> [--output <caminho>]
+./run.sh all --input <caminho> --source <id>
 
 # plotar grafo (gera DOT e PNG)
 ./run.sh plot --input <caminho> --source <id> [--dot <arquivo.dot>]
@@ -82,14 +81,13 @@ Exemplos:
 ./run.sh plot --input instances/graph_10.txt --source 0
 ```
 
-Observação: no modo `plot`, o script gera um arquivo DOT e, se o Graphviz estiver instalado, renderiza um PNG e abre a imagem automaticamente no macOS.
+Observação: no modo `plot`, o script gera um arquivo DOT e, se o Graphviz estiver instalado, renderiza um PNG.
 
 ## Flags suportadas pelo binário
-- `--input <caminho>`: arquivo de instância (formato `u v capacity [cost]`).
-## Flags suportadas pelo binário
 - `--input <caminho>`: arquivo de instância (formato `u v cost`).
-- `--output <caminho>`: arquivo de saída do relatório (opcional).
 - `--bellman`: executa o algoritmo de Bellman-Ford para caminhos mínimos.
+- `--floyd`: executa o algoritmo de Floyd para caminhos mínimos.
+
 
 ## Visualização com Graphviz
 Instale o Graphviz (macOS):
@@ -107,18 +105,6 @@ Renderize DOT para PNG:
 dot -Tpng graph_10.dot -o graph_10.png
 open graph_10.png
 ```
-
-## Funções principais (código)
-- `Graph`
-    - `add_vertex(label)`
-    - `add_edge(from, to, capacity)`
-    - consultas: `vertices()`, `edges()`, `outgoing(v)`, `incoming(v)`
-    - fluxo/capacidade: `set_edge_capacity`, `edge_capacity`, `set_edge_flow`, `edge_flow`
-- IO (`io.hpp`/`io.cpp`)
-    - `Graph load_graph_from_file(const std::string& path)`
-    - `FlowReport build_flow_report(const Graph& g)`
-    - `void write_report_to_file(const std::string& path, const FlowReport& report)`
-    - `void write_dot(const std::string& path, const Graph& g)`
 
 ## Requisitos de compilação
 Se necessário, torne o script executável:

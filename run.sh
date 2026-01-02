@@ -28,7 +28,6 @@ run() {
     echo "Binary not found, compiling..."
     compile
   fi
-  # repassa todos os argumentos ao binário (flags de instância)
   "$BIN" "$@"
 }
 
@@ -60,6 +59,6 @@ case ${1:-all} in
     fi
     ;;
   *)
-    echo "Usage: $0 [build|run|all|plot] [--input <path> --output <path> --source <s> --dot <path.dot>]" >&2
+    echo "Usage: $0 [build|run|all|plot] [--input <path> --source <s> --dot <path.dot>]" >&2
     exit 2 ;;
 esac
