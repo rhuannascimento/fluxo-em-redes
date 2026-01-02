@@ -1,0 +1,21 @@
+2026-01-02 15:42:40,650 - INFO - Initializing algorithm state with source node: 0
+2026-01-02 15:42:40,650 - INFO - State initialized. Source: 0. All other distances set to INF.
+2026-01-02 15:42:48,363 - INFO - RELAX SUCCESS: 0->1 (w=10). Updated dist[1] from inf to 10.0.
+2026-01-02 15:42:49,953 - INFO - RELAX SUCCESS: 0->2 (w=7). Updated dist[2] from inf to 7.0.
+2026-01-02 15:42:50,948 - INFO - RELAX SUCCESS: 0->3 (w=10). Updated dist[3] from inf to 10.0.
+2026-01-02 15:42:51,710 - INFO - RELAX SUCCESS: 0->4 (w=13). Updated dist[4] from inf to 13.0.
+2026-01-02 15:42:52,546 - INFO - RELAX SUCCESS: 0->5 (w=2). Updated dist[5] from inf to 2.0.
+2026-01-02 15:42:53,376 - INFO - RELAX SUCCESS: 0->6 (w=3). Updated dist[6] from inf to 3.0.
+2026-01-02 15:42:55,037 - INFO - RELAX SUCCESS: 0->7 (w=3). Updated dist[7] from inf to 3.0.
+2026-01-02 15:42:55,995 - INFO - RELAX SUCCESS: 0->8 (w=6). Updated dist[8] from inf to 6.0.
+2026-01-02 15:42:57,004 - INFO - RELAX SUCCESS: 0->9 (w=13). Updated dist[9] from inf to 13.0.
+2026-01-02 15:43:02,902 - INFO - Path reconstructed for target 0: 0 (Cost: 0.0)
+2026-01-02 15:43:02,903 - INFO - Path reconstructed for target 1: 0 -> 1 (Cost: 10.0)
+2026-01-02 15:43:02,903 - INFO - Path reconstructed for target 2: 0 -> 2 (Cost: 7.0)
+2026-01-02 15:43:02,903 - INFO - Path reconstructed for target 3: 0 -> 3 (Cost: 10.0)
+2026-01-02 15:43:02,903 - INFO - Path reconstructed for target 4: 0 -> 4 (Cost: 13.0)
+2026-01-02 15:43:02,904 - INFO - Path reconstructed for target 5: 0 -> 5 (Cost: 2.0)
+2026-01-02 15:43:02,904 - INFO - Path reconstructed for target 6: 0 -> 6 (Cost: 3.0)
+2026-01-02 15:43:02,904 - INFO - Path reconstructed for target 7: 0 -> 7 (Cost: 3.0)
+2026-01-02 15:43:02,904 - INFO - Path reconstructed for target 8: 0 -> 8 (Cost: 6.0)
+2026-01-02 15:43:02,905 - INFO - Path reconstructed for target 9: 0 -> 9 (Cost: 13.0)
