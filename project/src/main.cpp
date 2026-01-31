@@ -381,9 +381,19 @@ int main(int argc, char* argv[]) {
     }
 
     if (!dotPath.empty() && !runFord) {
-        write_dot(dotPath, g);
+        bool hasCapacity = false;
+        for(auto eid : g.edges()) { 
+            if(g.get_edge(eid)->capacity() > 0) { hasCapacity = true; break; }
+        }
+        if(hasCapacity) write_dot_capacitated(dotPath, g);
+        else write_dot(dotPath, g);
     } else if (!runFord) {
-        write_dot("graph.dot", g);
+        bool hasCapacity = false;
+        for(auto eid : g.edges()) { 
+            if(g.get_edge(eid)->capacity() > 0) { hasCapacity = true; break; }
+        }
+        if(hasCapacity) write_dot_capacitated("graph.dot", g);
+        else write_dot("graph.dot", g);
     }
 
     return 0;

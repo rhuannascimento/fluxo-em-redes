@@ -77,6 +77,25 @@ void write_dot(const std::string& path, const Graph& g) {
     out << "}\n";
 }
 
+void write_dot_capacitated(const std::string& path, const Graph& g) {
+    std::ofstream out(path);
+    if (!out.is_open()) return;
+    out << "digraph G {\n";
+    out << "  rankdir=LR;\n";
+    for (auto vid : g.vertices()) {
+        const Vertex* v = g.get_vertex(vid);
+        std::string label = v ? v->label() : std::to_string(vid);
+        out << "  " << vid << " [label=\"" << label << "\"];\n";
+    }
+    for (auto eid : g.edges()) {
+        const Edge* e = g.get_edge(eid);
+        if (!e) continue;
+        out << "  " << e->from() << " -> " << e->to()
+            << " [label=\"cap=" << e->capacity() << "\"];\n";
+    }
+    out << "}\n";
+}
+
 void write_dot_with_flow(const std::string& path, const Graph& g) {
     std::ofstream out(path);
     if (!out.is_open()) return;
