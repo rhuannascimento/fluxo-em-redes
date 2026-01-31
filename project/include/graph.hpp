@@ -20,7 +20,7 @@ public:
     static constexpr int INF = 1000000000;
 
     VertexId add_vertex(const std::string& label = "");
-    EdgeId add_edge(VertexId from, VertexId to, int cost = 0);
+    EdgeId add_edge(VertexId from, VertexId to, int cost = 0, int capacity = 0);
 
     const Vertex* get_vertex(VertexId id) const;
     const Edge* get_edge(EdgeId id) const;
@@ -37,10 +37,19 @@ public:
     int edge_cost(EdgeId id) const;
     void set_edge_cost(EdgeId id, int cost);
 
+    int edge_capacity(EdgeId id) const;
+    void set_edge_capacity(EdgeId id, int capacity);
+
+    int edge_flow(EdgeId id) const;
+    void set_edge_flow(EdgeId id, int flow);
+
     size_t num_vertices() const;
     void resize_cost_matrix_for_new_vertex(int inf = INF);
     void set_matrix_cost(VertexId u, VertexId v, int c);
     const std::vector<std::vector<int>>& cost_matrix() const;
+
+    void set_matrix_capacity(VertexId u, VertexId v, int c);
+    const std::vector<std::vector<int>>& capacity_matrix() const;
 
     std::optional<VertexId> vertex_id_by_label(const std::string& label) const;
 
@@ -54,4 +63,5 @@ private:
     std::unordered_map<VertexId, std::vector<EdgeId>> adj_out_;
     std::unordered_map<VertexId, std::vector<EdgeId>> adj_in_;
     std::vector<std::vector<int>> cost_matrix_;
+    std::vector<std::vector<int>> capacity_matrix_;
 };

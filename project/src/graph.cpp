@@ -11,12 +11,13 @@ Vertex::Id Graph::add_vertex(const std::string& label) {
     return id;
 }
 
-Edge::Id Graph::add_edge(VertexId from, VertexId to, int cost) {
+Edge::Id Graph::add_edge(VertexId from, VertexId to, int cost, int capacity) {
     const auto id = next_edge_id_++;
-    edges_.emplace(id, std::make_unique<Edge>(id, from, to, cost));
+    edges_.emplace(id, std::make_unique<Edge>(id, from, to, cost, capacity));
     adj_out_[from].push_back(id);
     adj_in_[to].push_back(id);
     set_matrix_cost(from, to, static_cast<int>(cost));
+    set_matrix_capacity(from, to, capacity);
     return id;
 }
 
@@ -77,6 +78,28 @@ void Graph::set_edge_cost(EdgeId id, int cost) {
     if (it != edges_.end()) it->second->set_cost(cost);
 }
 
+int Graph::edge_capacity(EdgeId id) const {
+    auto it = edges_.find(id);
+    if (it == edges_.end()) return 0;
+    return it->second->capacity();
+}
+
+void Graph::set_edge_capacity(EdgeId id, int capacity) {
+    auto it = edges_.find(id);
+    if (it != edges_.end()) it->second->set_capacity(capacity);
+}
+
+int Graph::edge_flow(EdgeId id) const {
+    auto it = edges_.find(id);
+    if (it == edges_.end()) return 0;
+    return it->second->flow();
+}
+
+void Graph::set_edge_flow(EdgeId id, int flow) {
+    auto it = edges_.find(id);
+    if (it != edges_.end()) it->second->set_flow(flow);
+}
+
 size_t Graph::num_vertices() const {
     return next_vertex_id_;
 }
@@ -90,6 +113,11 @@ void Graph::resize_cost_matrix_for_new_vertex(int inf) {
     cost_matrix_.emplace_back(n, inf);
 
     for (size_t i = 0; i < n; ++i) cost_matrix_[i][i] = 0;
+
+    if (capacity_matrix_.size() < n) {
+        for (auto &row : capacity_matrix_) row.resize(n, 0);
+        capacity_matrix_.emplace_back(n, 0);
+    }
 }
 
 void Graph::set_matrix_cost(VertexId u, VertexId v, int c) {
@@ -99,6 +127,15 @@ void Graph::set_matrix_cost(VertexId u, VertexId v, int c) {
 
 const std::vector<std::vector<int>>& Graph::cost_matrix() const {
     return cost_matrix_;
+}
+
+void Graph::set_matrix_capacity(VertexId u, VertexId v, int c) {
+    if (u >= capacity_matrix_.size() || v >= capacity_matrix_.size()) return;
+    capacity_matrix_[u][v] += c;
+}
+
+const std::vector<std::vector<int>>& Graph::capacity_matrix() const {
+    return capacity_matrix_;
 }
 
 std::optional<Graph::VertexId> Graph::vertex_id_by_label(const std::string& label) const {

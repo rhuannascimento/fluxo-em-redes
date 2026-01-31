@@ -9,6 +9,7 @@
 #include "io.hpp"
 #include "bellman_ford.hpp"
 #include "floyd.hpp"
+#include "ford_fulkerson.hpp"
 
 namespace {
 
@@ -31,33 +32,59 @@ void print_cost_matrix(const Graph &g) {
     }
 }
 
+void print_capacity_matrix(const Graph &g) {
+    const auto &cm = g.capacity_matrix();
+    if (cm.empty()) {
+        std::cout << "Matriz de capacidades vazia (grafo nao carregado).\n";
+        return;
+    }
+    std::cout << "Matriz de Capacidades:\n";
+    for (const auto &row : cm) {
+        for (int val : row) {
+            std::cout << std::setw(5) << val;
+        }
+        std::cout << "\n";
+    }
+}
+
 void run_bellman_cli(const Graph &g) {
     if (g.num_vertices() == 0) {
         std::cout << "Grafo nao carregado. Leia uma instancia primeiro.\n";
         return;
     }
-    std::cout << "Vertice fonte para Bellman-Ford: ";
-    Graph::VertexId source;
-    std::cin >> source;
-    if (!g.has_vertex(source)) {
+    std::cout << "Vertice fonte para Bellman-Ford (Label): ";
+    std::string source_label;
+    std::cin >> source_label;
+    
+    auto source_opt = g.vertex_id_by_label(source_label);
+    if (!source_opt.has_value()) {
         std::cout << "Vertice invalido.\n";
         return;
     }
+    Graph::VertexId source = source_opt.value();
+
     BellmanFordResult res = bellman_ford_recursive(g, source);
     if (res.has_negative_cycle) {
         std::cout << "Ciclo negativo detectado!\n";
         return;
     }
-    std::cout << "Caminho minimo de " << source << ":\n";
+    std::cout << "Caminho minimo de " << source_label << " (" << source << "):\n";
     for (size_t i = 0; i < res.distances.size(); ++i) {
-        std::cout << "para " << i << ": ";
+        std::string target_label = std::to_string(i);
+        const Vertex* v = g.get_vertex(i);
+        if(v) target_label = v->label();
+
+        std::cout << "para " << target_label << ": ";
         if (res.distances[i] >= Graph::INF / 10) {
             std::cout << "INF";
         } else {
             std::cout << res.distances[i];
         }
         if (res.predecessors[i] != static_cast<Graph::VertexId>(-1)) {
-            std::cout << " (pred: " << res.predecessors[i] << ")";
+            std::string pred_label = std::to_string(res.predecessors[i]);
+            const Vertex* pv = g.get_vertex(res.predecessors[i]);
+            if(pv) pred_label = pv->label();
+            std::cout << " (pred: " << pred_label << ")";
         }
         std::cout << "\n";
     }
@@ -99,20 +126,58 @@ void run_floyd_cli(const Graph &g) {
     }
 }
 
+void run_ford_fulkerson_cli(const Graph &g) {
+    if (g.num_vertices() == 0) {
+        std::cout << "Grafo nao carregado. Leia uma instancia primeiro.\n";
+        return;
+    }
+    std::cout << "Vertice origem (source - Label): ";
+    std::string source_label;
+    std::cin >> source_label;
+    std::cout << "Vertice destino (sink - Label): ";
+    std::string sink_label;
+    std::cin >> sink_label;
+    
+    auto source_opt = g.vertex_id_by_label(source_label);
+    auto sink_opt = g.vertex_id_by_label(sink_label);
+
+    if (!source_opt.has_value() || !sink_opt.has_value()) {
+        std::cout << "Vertices invalidos (Labels nao encontrados).\n";
+        return;
+    }
+    
+    Graph::VertexId source = source_opt.value();
+    Graph::VertexId sink = sink_opt.value();
+    
+    FordFulkersonResult res = ford_fulkerson(g, source, sink);
+    std::cout << "Fluxo Maximo de " << source_label << " para " << sink_label << ": " << res.max_flow << "\n";
+    
+    write_dot_with_flow("flow_graph.dot", res.flow_graph);
+    std::cout << "Grafo com fluxos salvo em 'flow_graph.dot'. Use 'dot -Tpng flow_graph.dot -o flow.png' para visualizar.\n";
+}
+
 void print_out_in_for_vertex(const Graph &g) {
     if (g.num_vertices() == 0) {
         std::cout << "Grafo nao carregado. Leia uma instancia primeiro.\n";
         return;
     }
-    std::cout << "Id do vertice: ";
-    Graph::VertexId v;
-    std::cin >> v;
-    if (!g.has_vertex(v)) {
-        std::cout << "Vertice invalido.\n";
+    std::cout << "Label do vertice: ";
+    std::string label;
+    std::cin >> label;
+    
+    auto vid_opt = g.vertex_id_by_label(label);
+    if (!vid_opt.has_value()) {
+        std::cout << "Vertice nao encontrado.\n";
         return;
     }
+    Graph::VertexId v = vid_opt.value();
 
-    std::cout << "Outgoing (arestas saindo de " << v << "):\n";
+    const auto* vertex_ptr = g.get_vertex(v);
+    if(vertex_ptr) {
+        std::cout << "Informacoes do Vertice: " << vertex_ptr->label() << " (ID: " << v << ")\n";
+    }
+
+    std::cout << "Outgoing (arestas saindo de " << label << "):\n";
     auto out_edges = g.outgoing(v);
     if (out_edges.empty()) {
         std::cout << "  (nenhuma)\n";
@@ -120,13 +185,17 @@ void print_out_in_for_vertex(const Graph &g) {
         for (auto eid : out_edges) {
             const Edge *e = g.get_edge(eid);
             if (e) {
-                std::cout << "  e" << e->id() << ": " << e->from() << " -> " << e->to()
-                          << ", custo = " << e->cost() << "\n";
+                std::string to_label = std::to_string(e->to());
+                const Vertex* tv = g.get_vertex(e->to());
+                if(tv) to_label = tv->label();
+
+                std::cout << "  " << label << " -> " << to_label
+                          << ", cap: " << e->capacity() << ", flow: " << e->flow() << "\n";
             }
         }
     }
 
-    std::cout << "Incoming (arestas chegando em " << v << "):\n";
+    std::cout << "Incoming (arestas chegando em " << label << "):\n";
     auto in_edges = g.incoming(v);
     if (in_edges.empty()) {
         std::cout << "  (nenhuma)\n";
@@ -134,37 +203,46 @@ void print_out_in_for_vertex(const Graph &g) {
         for (auto eid : in_edges) {
             const Edge *e = g.get_edge(eid);
             if (e) {
-                std::cout << "  e" << e->id() << ": " << e->from() << " -> " << e->to()
-                          << ", custo = " << e->cost() << "\n";
+                std::string from_label = std::to_string(e->from());
+                const Vertex* fv = g.get_vertex(e->from());
+                if(fv) from_label = fv->label();
+
+                std::cout << "  " << from_label << " -> " << label
+                          << ", cap: " << e->capacity() << ", flow: " << e->flow() << "\n";
             }
         }
     }
 }
 
-} // namespace
+}
 
 int main(int argc, char* argv[]) {
     std::string inputPath;
     std::string dotPath;
     bool runBellman = false;
     bool runFloyd = false;
-    Graph::VertexId source = 0;
+    bool runFord = false;
+    std::string sourceLabel = "0";
+    std::string sinkLabel = "0";
 
     for (int i = 1; i < argc; ++i) {
         if (std::strcmp(argv[i], "--input") == 0 && i + 1 < argc) {
             inputPath = argv[++i];
         } else if (std::strcmp(argv[i], "--source") == 0 && i + 1 < argc) {
-            source = static_cast<Graph::VertexId>(std::stoul(argv[++i]));
+            sourceLabel = argv[++i];
+        } else if (std::strcmp(argv[i], "--sink") == 0 && i + 1 < argc) {
+            sinkLabel = argv[++i];
         } else if (std::strcmp(argv[i], "--dot") == 0 && i + 1 < argc) {
             dotPath = argv[++i];
         } else if (std::strcmp(argv[i], "--bellman") == 0) {
             runBellman = true;
         } else if (std::strcmp(argv[i], "--floyd") == 0) {
             runFloyd = true;
+        } else if (std::strcmp(argv[i], "--ford") == 0) {
+            runFord = true;
         }
     }
 
-    // Modo interativo se nenhuma flag for passada
     if (argc == 1) {
         Graph g;
         bool running = true;
@@ -172,9 +250,11 @@ int main(int argc, char* argv[]) {
             std::cout << "\n===== MENU =====\n";
             std::cout << "1) Ler instancia de arquivo\n";
             std::cout << "2) Imprimir cost_matrix\n";
-            std::cout << "3) Executar Bellman-Ford\n";
-            std::cout << "4) Executar Floyd-Warshall\n";
-            std::cout << "5) Imprimir outgoing/incoming de um vertice\n";
+            std::cout << "3) Imprimir capacity_matrix\n";
+            std::cout << "4) Executar Bellman-Ford\n";
+            std::cout << "5) Executar Floyd-Warshall\n";
+            std::cout << "6) Executar Ford-Fulkerson (Fluxo Maximo)\n";
+            std::cout << "7) Imprimir outgoing/incoming de um vertice\n";
             std::cout << "0) Sair\n";
             std::cout << "Opcao: ";
 
@@ -199,12 +279,18 @@ int main(int argc, char* argv[]) {
                 print_cost_matrix(g);
                 break;
             case 3:
-                run_bellman_cli(g);
+                print_capacity_matrix(g);
                 break;
             case 4:
-                run_floyd_cli(g);
+                run_bellman_cli(g);
                 break;
             case 5:
+                run_floyd_cli(g);
+                break;
+            case 6:
+                run_ford_fulkerson_cli(g);
+                break;
+            case 7:
                 print_out_in_for_vertex(g);
                 break;
             case 0:
@@ -224,6 +310,20 @@ int main(int argc, char* argv[]) {
     }
 
     Graph g = load_graph_from_file(inputPath);
+    
+    Graph::VertexId source = 0;
+    auto sourceOpt = g.vertex_id_by_label(sourceLabel);
+    if(sourceOpt) source = *sourceOpt;
+    else if (!inputPath.empty()) { 
+         if (sourceLabel != "0") std::cerr << "Aviso: Source '" << sourceLabel << "' nao encontrado. Usando 0.\n";
+    }
+
+    Graph::VertexId sink = 0;
+    auto sinkOpt = g.vertex_id_by_label(sinkLabel);
+    if(sinkOpt) sink = *sinkOpt;
+    else if (!inputPath.empty() && sinkLabel != "0") {
+         std::cerr << "Aviso: Sink '" << sinkLabel << "' nao encontrado. Usando 0.\n";
+    }
 
     if (runBellman) {
         BellmanFordResult res = bellman_ford_recursive(g, source);
@@ -270,9 +370,19 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    if (!dotPath.empty()) {
+    if (runFord) {
+        FordFulkersonResult res = ford_fulkerson(g, source, sink);
+        std::cout << "Fluxo Maximo de " << sourceLabel << " para " << sinkLabel << ": " << res.max_flow << "\n";
+        
+        std::string outPath = !dotPath.empty() ? dotPath : "flow_graph.dot";
+        
+        write_dot_with_flow(outPath, res.flow_graph);
+        std::cout << "Grafo com fluxos salvo em '" << outPath << "'.\n";
+    }
+
+    if (!dotPath.empty() && !runFord) {
         write_dot(dotPath, g);
-    } else {
+    } else if (!runFord) {
         write_dot("graph.dot", g);
     }
 
