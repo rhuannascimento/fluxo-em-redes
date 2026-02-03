@@ -10,6 +10,7 @@
 #include "bellman_ford.hpp"
 #include "floyd.hpp"
 #include "ford_fulkerson.hpp"
+#include <chrono>
 
 namespace {
 
@@ -217,6 +218,7 @@ void print_out_in_for_vertex(const Graph &g) {
 }
 
 int main(int argc, char* argv[]) {
+    auto start = std::chrono::high_resolution_clock::now();
     std::string inputPath;
     std::string dotPath;
     bool runBellman = false;
@@ -395,6 +397,10 @@ int main(int argc, char* argv[]) {
         if(hasCapacity) write_dot_capacitated("graph.dot", g);
         else write_dot("graph.dot", g);
     }
+
+     auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = end - start;
+    std::cout << "Ford-Fulkerson processing time: " << elapsed.count() << "s" << std::endl;
 
     return 0;
 }
