@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <map>
+#include <chrono>
 
 using namespace std;
 
@@ -30,6 +31,7 @@ bool dfs(int u, int t, const vector<vector<int>>& adj,
 } 
 
 FordFulkersonResult ford_fulkerson(const Graph& g, Graph::VertexId source, Graph::VertexId sink) {
+    auto start = std::chrono::high_resolution_clock::now();
     size_t n = g.num_vertices();
     if (n == 0 || source >= n || sink >= n) {
         return {0, Graph{}};
@@ -95,6 +97,9 @@ FordFulkersonResult ford_fulkerson(const Graph& g, Graph::VertexId source, Graph
         max_flow += path_flow;
     }
 
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = end - start;
+    std::cout << "Ford-Fulkerson processing time: " << elapsed.count() << "s" << std::endl;
   
     Graph flow_graph;
     std::map<int, int> id_map;
